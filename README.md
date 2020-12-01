@@ -14,7 +14,7 @@ Install the dependencies then run the script. If `--since` is not provided, time
 
 ```bash
 $ pip install -r requirements.txt
-$ python3 timetracker.py --since 2020-01-01 --token <toggle_token>
+$ python3 timetracker.py --since 2020-01-01 --token <toggl_token>
 
 checkin 2020-01-01
 - 3.64 hrs #project-1 Bugs
@@ -35,6 +35,30 @@ python3 timetracker.py --since 2020-01-01 --timezone='Asia/Manila'
 ```
 
 The script applies a `.lower()` to the the project name and places a `#` infront of the project. `Project-1` will be converted to `#project-1`
+
+
+## Submit to #dailycheckin
+
+You can automatically post your checkins to the #dailycheckin channel by configuring some Slack credentials. You will need a Slack app that has the `chat:write` user scope. We're using the [Heartbeat](https://api.slack.com/apps/A4LLUCFUN) app by default.
+```
+export SLACK_CLIENT_ID=<heartbeat_app_client_id>
+export SLACK_CLIENT_SECRET=<heartbet_app_client_secret>
+```
+
+Run the local server to print the url for authorizing the app. Open this url on a browser where you're logged in to Slack. You should see the generated user token after clicking "Allow".
+```
+python3 slack_token.py
+```
+
+Use this generated user token as an arg or as an env variable:
+```
+python3 timetracker.py --slack-token <slack_user_token>
+# or
+export TIMETRACKER_SLACK_TOKEN=<slack_user_token>
+python3 timetracker.py
+```
+
+The timetracker script should now prompt you to submit your checkins to #dailycheckin.
 
 ## Development
 Setting up development
