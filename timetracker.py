@@ -11,7 +11,7 @@ def get_entries(token, start, end):
     start_date = start.set(hour=0, minute=0, second=0, microsecond=0)
     end_date = end.add(days=1).set(hour=0, minute=0, second=0, microsecond=0)
     entries = requests.get(
-        "https://www.toggl.com/api/v8/time_entries",
+        "https://api.track.toggl.com/api/v8/time_entries",
         params={"start_date": start_date.isoformat(), "end_date": end_date.isoformat()},
         auth=HTTPBasicAuth(token, "api_token"),
     ).json()
@@ -27,7 +27,7 @@ def get_projects(token, entries):
 
 def get_project_by_id(id, token):
     project = requests.get(
-        f"https://www.toggl.com/api/v8/projects/{id}",
+        f"https://api.track.toggl.com/api/v8/projects/{id}",
         auth=HTTPBasicAuth(token, "api_token"),
     )
     return project.json().get("data")
