@@ -7,21 +7,23 @@ from requests.auth import HTTPBasicAuth
 from toolz import groupby, valmap
 
 
-def get_entries(token, workspace_id, client_id, start, end):
+def get_entries(token, workspace_id, start, end, client_id=None):
     start_date = start.set(hour=0, minute=0, second=0, microsecond=0)
     end_date = end.set(hour=0, minute=0, second=0, microsecond=0)
     page = 1
     while True:
+        params = {
+            "user_agent": "Thinking Machines",
+            "workspace_id": workspace_id,
+            "since": start_date.isoformat(),
+            "until": end_date.isoformat(),
+            "page": page,
+        }
+        if client_id:
+            params["client_ids"] = client_id
         resp = requests.get(
             "https://api.track.toggl.com/reports/api/v2/details",
-            params={
-                "user_agent": "Thinking Machines",
-                "workspace_id": workspace_id,
-                "client_ids": client_id,
-                "since": start_date.isoformat(),
-                "until": end_date.isoformat(),
-                "page": page,
-            },
+            params=params,
             auth=HTTPBasicAuth(token, "api_token"),
         ).json()
         for entry in resp.get("data", []):
@@ -114,8 +116,6 @@ def main(
         raise ValueError("Toggl token is needed")
     if toggl_workspace_id is None or toggl_workspace_id == "":
         raise ValueError("Toggl workspace id is needed")
-    if toggl_client_id is None or toggl_client_id == "":
-        raise ValueError("Toggl client id is needed")
     now = pendulum.now(timezone)
     if since:
         start = pendulum.parse(since).set(tz=timezone)
@@ -125,7 +125,9 @@ def main(
         end = pendulum.parse(until).set(tz=timezone)
     else:
         end = now
-    entries = get_entries(toggl_token, toggl_workspace_id, toggl_client_id, start, end)
+    entries = get_entries(
+        toggl_token, toggl_workspace_id, start, end, client_id=toggl_client_id
+    )
     summaries = summarize(entries, timezone)
     checkins = []
     for date, summary in summaries.items():
